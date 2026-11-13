@@ -1,8 +1,10 @@
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
+import textwrap
 from concurrent.futures import ThreadPoolExecutor
 from typing import List
 
@@ -47,18 +49,33 @@ def check_all(pkgs: List[Pkg], registry: Registry, jobs: int = 8) -> List[Verdic
 def render(verdicts: List[Verdict], color: bool, verbose: bool) -> str:
     paint = _color(color)
     lines = []
-    width = max((len(v.name) for v in verdicts), default=0)
+    width = _term_width()
+    name_w = max((len(v.name) for v in verdicts), default=0)
     for v in verdicts:
         tag = {OK: "  ok ", WARN: " warn", BLOCK: "block"}[v.level]
-        head = f"{paint(tag, v.level)}  {v.ecosystem:<4}  {v.name:<{width}}  {paint(f'score {v.score:>3}', 'dim')}"
+        head = f"{paint(tag, v.level)}  {v.ecosystem:<4}  {v.name:<{name_w}}  {paint(f'score {v.score:>3}', 'dim')}"
         lines.append(head)
         if v.error:
             lines.append(f"         {paint('could not reach registry: ' + v.error, WARN)}")
         if v.level != OK or verbose:
             for f in v.findings:
-                pts = f"+{f.points}" if f.points else "  "
-                lines.append(f"         {paint(pts.rjust(4), 'dim')}  {f.message}")
+                pts = f"+{f.points}" if f.points else ""
+                lines.extend(_wrap(paint(pts.rjust(4), "dim"), f.message, width))
     return "\n".join(lines)
+
+
+INDENT = 15  # 9 spaces + 4-char points column + 2 spaces
+
+
+def _wrap(points: str, message: str, width: int) -> List[str]:
+    body = textwrap.wrap(message, width=max(30, width - INDENT)) or [""]
+    out = [f"         {points}  {body[0]}"]
+    out.extend(" " * INDENT + line for line in body[1:])
+    return out
+
+
+def _term_width() -> int:
+    return min(100, shutil.get_terminal_size((80, 24)).columns)
 
 
 def worst(verdicts: List[Verdict]) -> str:

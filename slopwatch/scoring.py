@@ -63,8 +63,8 @@ def score(info: PackageInfo, now: Optional[datetime] = None) -> Verdict:
     found: List[Finding] = []
 
     if not info.exists:
-        found.append(Finding(100, "not on the registry. If an AI suggested this name, it was "
-                                  "probably made up, and anyone can register it"))
+        found.append(Finding(100, "doesn't exist on the registry. Likely a hallucinated "
+                                  "name, and anyone could register it"))
         hit = lookalike(eco, name)
         if hit:
             found.append(Finding(0, f"did you mean '{hit[0]}'? ({hit[1]})"))
@@ -73,8 +73,8 @@ def score(info: PackageInfo, now: Optional[datetime] = None) -> Verdict:
     popular = is_popular(eco, name)
 
     if eco == "npm" and (info.latest_version or "").endswith("-security"):
-        found.append(Finding(60, "npm security placeholder: a malicious package with this "
-                                 "name was taken down. You almost certainly mistyped something"))
+        found.append(Finding(60, "npm security placeholder: a malicious package with "
+                                 "this name was removed"))
 
     age = (now - info.created).days if info.created else None
     established = age is not None and age > 365 and info.release_count >= 5
