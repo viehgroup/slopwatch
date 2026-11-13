@@ -97,7 +97,9 @@ slopwatch ships a `PreToolUse` hook. Add this to `.claude/settings.json`
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "hooks": [{ "type": "command", "command": "slopwatch hook" }]
+        "hooks": [
+          { "type": "command", "command": "slopwatch hook" }
+        ]
       }
     ]
   }
