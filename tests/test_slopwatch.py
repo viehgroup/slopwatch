@@ -156,6 +156,15 @@ class RegistryParsingTests(unittest.TestCase):
         self.assertIsNone(p.repository)
 
 
+class RenderTests(unittest.TestCase):
+    def test_long_findings_wrap_to_terminal(self):
+        v = score(PackageInfo("pypi", "flask-jwt-simple-auth", exists=False), NOW)
+        with mock.patch("shutil.get_terminal_size", return_value=os.terminal_size((60, 24))):
+            out = cli.render([v], color=False, verbose=False)
+        self.assertTrue(all(len(line) <= 60 for line in out.splitlines()), out)
+        self.assertIn("registry", out)
+
+
 class HookTests(unittest.TestCase):
     def _run_hook(self, payload, lookup):
         args = cli.build_parser().parse_args(["hook"])
