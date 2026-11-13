@@ -6,15 +6,18 @@ Catch hallucinated, typosquatted and brand-new packages before `pip` or `npm` in
 $ slopwatch check pypi requests reqeusts flask-jwt-simple-auth
   ok   pypi  requests               score   0
 block  pypi  reqeusts               score 100
-         +100  not on the registry. If an AI suggested this name, it was probably made up, and anyone can register it
+         +100  doesn't exist on the registry. Likely a hallucinated
+               name, and anyone could register it
                did you mean 'requests'? (1 character away)
 block  pypi  flask-jwt-simple-auth  score 100
-         +100  not on the registry. If an AI suggested this name, it was probably made up, and anyone can register it
+         +100  doesn't exist on the registry. Likely a hallucinated
+               name, and anyone could register it
 
 $ slopwatch check npm axios axois
   ok   npm   axios  score   5
 block  npm   axois  score 100
-          +60  npm security placeholder: a malicious package with this name was taken down. You almost certainly mistyped something
+          +60  npm security placeholder: a malicious package with this
+               name was removed
           +40  looks like 'axios' (1 character away)
           +10  only one release
 ```
