@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slopwatch"
+version = "0.1.0"
+description = "Catch hallucinated, typosquatted and brand-new packages before pip or npm installs them"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "VIEH Security Team" }]
+requires-python = ">=3.9"
+dependencies = []
+keywords = ["security", "supply-chain", "typosquatting", "slopsquatting", "pypi", "npm", "ai-agents"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Security",
+    "Environment :: Console",
+]
+
+[project.scripts]
+slopwatch = "slopwatch.cli:main"
+
+[tool.setuptools]
+packages = ["slopwatch"]
+
+[tool.setuptools.package-data]
+slopwatch = ["data/*.txt"]
