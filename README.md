@@ -167,6 +167,13 @@ python -m unittest discover -s tests -v
 Tests run offline. The popular-package list comes from
 [hugovk/top-pypi-packages](https://github.com/hugovk/top-pypi-packages).
 
+## Related
+
+From the same team:
+[agentscan](https://github.com/viehgroup/agentscan) finds leaked keys and risky settings
+in AI agent configs, and [extwatch](https://github.com/viehgroup/extwatch) catches
+backdoored VS Code, Cursor and Windsurf extensions.
+
 ## License
 
 MIT. Built and maintained by the **VIEH Security Team**.
