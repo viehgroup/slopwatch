@@ -27,6 +27,12 @@ def _ordered(ecosystem: str):
     return tuple(sorted(popular(ecosystem)))
 
 
+@lru_cache(maxsize=None)
+def familiar_scopes(ecosystem: str) -> FrozenSet[str]:
+    """npm scopes that popular packages use."""
+    return frozenset(n.split("/", 1)[0] for n in popular(ecosystem) if n.startswith("@") and "/" in n)
+
+
 def is_popular(ecosystem: str, name: str) -> bool:
     return normalize(ecosystem, name) in popular(ecosystem)
 
@@ -66,10 +72,11 @@ def lookalike(ecosystem: str, name: str) -> Optional[Tuple[str, str]]:
     if norm in top:
         return None
 
-    # scoped npm package mimicking an unscoped one: @evil/lodash
+    # scoped npm package mimicking an unscoped one: @evil/lodash. Scopes that popular
+    # packages already use (@types, @babel, @sentry, ...) are familiar: @types/jsdom is fine.
     if ecosystem == "npm" and norm.startswith("@") and "/" in norm:
-        bare = norm.split("/", 1)[1]
-        if bare in top:
+        scope, bare = norm.split("/", 1)
+        if bare in top and scope not in familiar_scopes(ecosystem):
             return bare, "same name under an unfamiliar scope"
 
     squashed = _squash(norm)
