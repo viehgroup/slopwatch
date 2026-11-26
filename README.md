@@ -132,12 +132,29 @@ doesn't load. The other agent tools that support pre-command hooks can call
 | PyPI source dist only (runs `setup.py` at install) | 10 |
 | Deprecated | 10 |
 
-30+ is a warning, 60+ is a block. Packages in the bundled top-5000 PyPI list or the
-popular npm list are never blocked.
+30+ is a warning, 60+ is a block. Packages on the popular lists (the 5,000 most
+downloaded PyPI projects, and the 2,000 most downloaded npm packages plus a hand-picked
+set) are never blocked.
 
 Lookalike detection compares against those lists using edit distance with adjacent
 transpositions (`reqeusts`), separator collapsing (`crossenv` vs `cross-env`), common
-affixes (`python-requests`, `node-lodash`) and unfamiliar scopes (`@someone/lodash`).
+affixes (`python-requests`, `node-lodash`) and unfamiliar scopes (`@someone/lodash`). A
+scope that popular packages already use, like `@types` or `@sentry`, isn't unfamiliar.
+
+## Staying current
+
+A [scheduled workflow](.github/workflows/update-data.yml) refreshes both lists **every
+day**, runs the tests, and commits only when a list changed:
+
+| List | Source |
+|---|---|
+| PyPI, top 5,000 | [hugovk/top-pypi-packages](https://github.com/hugovk/top-pypi-packages), from PyPI's download data, refreshed monthly |
+| npm, top 2,000 | [wooorm/npm-high-impact](https://github.com/wooorm/npm-high-impact) (`lib/top-download.js`), plus [`npm_curated.txt`](slopwatch/data/npm_curated.txt) |
+
+It refuses to publish, and the run fails, if a source looks wrong: too few names, an
+invalid package name, or more than a quarter of a list replaced at once. Run it yourself
+with `python tools/update_data.py --check`. The npm source is refreshed by its author from
+time to time rather than on a schedule, so it can be a few months old.
 
 Registry responses are cached for six hours in `~/.cache/slopwatch`.
 Set `SLOPWATCH_NO_CACHE=1` or pass `--no-cache` to skip it.
@@ -157,6 +174,12 @@ Be clear about what this is and isn't.
 Tested against a random sample of 60 real packages ranked 5,000–15,000 on PyPI: no
 blocks, one warning (a young package one letter away from an established one).
 
+When the npm list grew from 194 hand-picked names to the top 2,000 (November 2026), typos
+of popular npm packages caught went from 11% to 100% of a 400-name sample. On 297 real
+npm packages ranked 2,001–5,000, scored with live registry data, there were no blocks and
+one warning (`rollup-pluginutils`, the renamed predecessor of `@rollup/pluginutils`). The
+same test exposed that scopes like `@types` counted as unfamiliar; that's fixed.
+
 ## Development
 
 ```
@@ -164,12 +187,16 @@ pip install -e .
 python -m unittest discover -s tests -v
 ```
 
-Tests run offline. The popular-package list comes from
-[hugovk/top-pypi-packages](https://github.com/hugovk/top-pypi-packages).
+Tests run offline. Edit hand-picked npm names in `slopwatch/data/npm_curated.txt`; the
+updater rebuilds `npm_top.txt` from it.
 
 ## Related
 
 From the same team:
+[scriptwatch](https://github.com/viehgroup/scriptwatch) catches hacked website scripts,
+[nginxwatch](https://github.com/viehgroup/nginxwatch) checks whether nginx is exploitable,
+[ghostwatch](https://github.com/viehgroup/ghostwatch) finds hidden instructions for AI,
+[bumpwatch](https://github.com/viehgroup/bumpwatch) catches hijacked dependency updates,
 [agentscan](https://github.com/viehgroup/agentscan) finds leaked keys and risky settings
 in AI agent configs, and [extwatch](https://github.com/viehgroup/extwatch) catches
 backdoored VS Code, Cursor and Windsurf extensions.
